@@ -1,4 +1,4 @@
-# Media Trackr
+# News Media Harvester
 
 A secure web application for scraping and tracking media content, built with Supabase and Firecrawl.
 
@@ -14,8 +14,8 @@ A secure web application for scraping and tracking media content, built with Sup
 
 1. Clone the repository:
 ```bash
-git clone https://github.com/rikedoepp/media-trackr-scribe.git
-cd media-trackr-scribe
+git clone https://github.com/rikedoepp/news-media-harvester.git
+cd news-media-harvester
 ```
 
 2. Install dependencies:
@@ -73,4 +73,4 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ## Acknowledgments
 
 - [Supabase](https://supabase.com) for the backend infrastructure
-- [Firecrawl](https://firecrawl.dev) for the content scraping API 
+- [Firecrawl](https://firecrawl.dev) for the content scraping API
