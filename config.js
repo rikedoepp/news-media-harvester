@@ -1,0 +1,8 @@
+const config = {
+  supabaseUrl: 'https://torosdzdrwpnpyyzlslx.supabase.co',
+  supabaseAnonKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRvcm9zZHpkcndwbnB5eXpsc2x4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDQ3OTU2NDEsImV4cCI6MjA2MDM3MTY0MX0.sqUleF89MAKAYn_CCRFEWjm3iesNrxD3p8zU_PySyHo',
+  supabaseServiceKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRvcm9zZHpkcndwbnB5eXpsc2x4Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc0NDc5NTY0MSwiZXhwIjoyMDYwMzcxNjQxfQ.FHQlRUTFMsflKnbmssNz5E-vGC6pCp-REUEWhyTd-pQ',
+  firecrawlApiKey: 'fc-262aba9b9ddd4266bc9168d162677792'
+};
+
+module.exports = config; 

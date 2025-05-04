@@ -1,6 +1,11 @@
 title: Media Trackr
 description: A secure app for scraping and tracking media content
 
+config:
+  supabase:
+    url: https://torosdzdrwpnpyyzlslx.supabase.co
+    key: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRvcm9zZHpkcndwbnB5eXpsc2x4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDQ3OTU2NDEsImV4cCI6MjA2MDM3MTY0MX0.sqUleF89MAKAYn_CCRFEWjm3iesNrxD3p8zU_PySyHo
+
 pages:
   - name: home
     title: Media Trackr
@@ -122,25 +127,26 @@ functions:
       state.loading = true;
       state.error = null;
       try {
-        const response = await fetch('https://api.firecrawl.dev/scrape', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': 'Bearer fc-262aba9b9ddd4266bc9168d162677792'
-          },
-          body: JSON.stringify({ url })
+        const { data, error } = await supabase.rpc('scrape_article', {
+          url: url,
+          selectors: {
+            title: 'h1',
+            content: 'article',
+            author: '.author, .byline',
+            date: 'time[datetime], .date'
+          }
         });
         
-        if (!response.ok) {
-          throw new Error('Failed to scrape content');
+        if (error) {
+          throw new Error(error.message);
         }
         
-        const data = await response.json();
         state.results = {
           title: data.title,
           content: data.content,
           author: data.author,
-          published_date: data.published_date
+          published_date: data.date,
+          url: url
         };
       } catch (error) {
         state.error = error.message;
