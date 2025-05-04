@@ -1,0 +1,230 @@
+title: Media Trackr
+description: A secure app for scraping and tracking media content
+
+pages:
+  - name: home
+    title: Media Trackr
+    description: Scrape and track media content securely
+    sections:
+      - name: auth
+        title: Authentication
+        type: form
+        fields:
+          - name: email
+            type: email
+            label: Email
+            required: true
+          - name: password
+            type: password
+            label: Password
+            required: true
+        buttons:
+          - name: login
+            label: Login
+            type: submit
+            action: login
+          - name: signup
+            label: Sign Up
+            type: submit
+            action: signup
+
+      - name: scrape
+        title: Scrape Content
+        type: form
+        fields:
+          - name: url
+            type: url
+            label: URL to Scrape
+            required: true
+        buttons:
+          - name: scrape
+            label: Scrape
+            type: submit
+            action: scrape
+        states:
+          loading:
+            show: true
+            message: Scraping content...
+          error:
+            show: true
+            message: Error scraping content
+          success:
+            show: true
+            message: Content scraped successfully
+
+      - name: results
+        title: Scraped Content
+        type: table
+        columns:
+          - name: title
+            label: Title
+          - name: content
+            label: Content
+          - name: author
+            label: Author
+          - name: published_date
+            label: Published Date
+        actions:
+          - name: save
+            label: Save to Database
+            type: button
+            action: save
+
+      - name: saved_content
+        title: Saved Content
+        type: table
+        columns:
+          - name: title
+            label: Title
+          - name: url
+            label: URL
+          - name: published_at
+            label: Published Date
+        actions:
+          - name: delete
+            label: Delete
+            type: button
+            action: delete
+
+state:
+  loading: false
+  error: null
+  results: null
+  saved_content: []
+  user: null
+
+functions:
+  login:
+    params: [email, password]
+    code: |
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email: email,
+        password: password
+      });
+      if (error) throw error;
+      state.user = data.user;
+      state.error = null;
+
+  signup:
+    params: [email, password]
+    code: |
+      const { data, error } = await supabase.auth.signUp({
+        email: email,
+        password: password
+      });
+      if (error) throw error;
+      state.user = data.user;
+      state.error = null;
+
+  scrape:
+    params: [url]
+    code: |
+      state.loading = true;
+      state.error = null;
+      try {
+        const response = await fetch('https://api.firecrawl.dev/scrape', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer fc-262aba9b9ddd4266bc9168d162677792'
+          },
+          body: JSON.stringify({ url })
+        });
+        
+        if (!response.ok) {
+          throw new Error('Failed to scrape content');
+        }
+        
+        const data = await response.json();
+        state.results = {
+          title: data.title,
+          content: data.content,
+          author: data.author,
+          published_date: data.published_date
+        };
+      } catch (error) {
+        state.error = error.message;
+      } finally {
+        state.loading = false;
+      }
+
+  save:
+    params: []
+    code: |
+      if (!state.user) {
+        state.error = 'Please login to save content';
+        return;
+      }
+
+      const { error } = await supabase
+        .from('articles')
+        .insert({
+          title: state.results.title,
+          content: state.results.content,
+          url: state.results.url,
+          published_at: state.results.published_date,
+          user_id: state.user.id
+        });
+
+      if (error) {
+        state.error = error.message;
+        return;
+      }
+
+      // Refresh saved content
+      const { data } = await supabase
+        .from('articles')
+        .select('*')
+        .eq('user_id', state.user.id)
+        .order('created_at', { ascending: false });
+
+      state.saved_content = data;
+
+  delete:
+    params: [id]
+    code: |
+      if (!state.user) {
+        state.error = 'Please login to delete content';
+        return;
+      }
+
+      const { error } = await supabase
+        .from('articles')
+        .delete()
+        .eq('id', id)
+        .eq('user_id', state.user.id);
+
+      if (error) {
+        state.error = error.message;
+        return;
+      }
+
+      // Refresh saved content
+      const { data } = await supabase
+        .from('articles')
+        .select('*')
+        .eq('user_id', state.user.id)
+        .order('created_at', { ascending: false });
+
+      state.saved_content = data;
+
+  load_saved_content:
+    params: []
+    code: |
+      if (!state.user) return;
+
+      const { data, error } = await supabase
+        .from('articles')
+        .select('*')
+        .eq('user_id', state.user.id)
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        state.error = error.message;
+        return;
+      }
+
+      state.saved_content = data;
+
+onMount:
+  - load_saved_content 
